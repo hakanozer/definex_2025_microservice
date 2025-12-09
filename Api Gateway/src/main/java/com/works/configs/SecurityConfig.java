@@ -19,61 +19,57 @@ public class SecurityConfig {
 
     private final CustomerService customerService;
     private final PasswordEncoder passwordEncoder;
-    private final SecurityFilter securityFilter;
+    private final JWTService jwtService;
 
-    // Security Config
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
 
+                // Stateless güvenlik (JWT için zorunlu)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Yetkilendirme kuralları
                 .authorizeHttpRequests(req -> req
-                        .requestMatchers("/customer/**").permitAll() // login / register
+                        .requestMatchers("/customer/**").permitAll()  // login/register
                         .requestMatchers("/product/**").hasRole("product")
                         .requestMatchers("/note/**").hasRole("note")
                         .anyRequest().authenticated()
                 )
 
-                .formLogin(form -> form.disable())
-                .authenticationProvider(authenticationProvider())
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(
-                                (req, res, authEx) -> {
-                                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-                                    res.getWriter().write("Unauthorized");
-                                }
+                .formLogin(login -> login.disable())
+                .logout(logout -> logout.disable())
 
-                        )
-                        .accessDeniedHandler(
-                                (req, res, deniedEx) ->
-                                {
-                                    res.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
-                                    res.getWriter().write("Forbidden");
-                                }
-                        )
+                .authenticationProvider(authenticationProvider())
+
+                // Hata yönetimi (en kritik kısım)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, e) -> {
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.getWriter().write("Unauthorized");
+                        })
+                        .accessDeniedHandler((req, res, e) -> {
+                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            res.getWriter().write("Forbidden");
+                        })
                 )
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // JWT Filter ekle
+                .addFilterBefore(
+                        new SecurityFilter(jwtService, customerService),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+
                 .build();
     }
 
-
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(customerService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
-        return authenticationProvider;
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customerService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
     }
-
-
 }
-
-/*
-ali@mail.com -> product
-veli@mail.com -> note
-zehra@mail.com -> product, note
- */

@@ -16,9 +16,8 @@
     </properties>
 
     <modules>
-        <module>common-libs/common-dto</module>
-        <module>services/service-user</module>
-        <module>services/api-gateway</module>
+        <module>Eureka Server</module>
+        <module>Api Gateway</module>
     </modules>
 
     <dependencyManagement>

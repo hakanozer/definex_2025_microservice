@@ -9,11 +9,18 @@
         <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/services/api-gateway/pom.xml" />
         <option value="$PROJECT_DIR$/services/service-user/pom.xml" />
+        <option value="$PROJECT_DIR$/services/deneme/pom.xml" />
+        <option value="$PROJECT_DIR$/Eureka Server/pom.xml" />
+        <option value="$PROJECT_DIR$/Api Gateway/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/common-libs/common-dto/pom.xml" />
+        <option value="$PROJECT_DIR$/services/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/services/deneme/pom.xml" />
+        <option value="$PROJECT_DIR$/services/service-user/pom.xml" />
       </set>
     </option>
   </component>

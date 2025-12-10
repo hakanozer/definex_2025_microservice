@@ -2,6 +2,7 @@ package com.works.configs;
 
 import com.works.services.CustomerService;
 import com.works.services.JWTService;
+import io.micrometer.tracing.Tracer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,15 +21,19 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
     private final CustomerService customerService;
+    private final Tracer tracer;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        final String traceId = tracer.currentTraceContext().context().traceId();
         final String authHeader = request.getHeader("Authorization");
 
         // 1) HEADER YOKSA → JWT yok → Security kendisi 401 verecek
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // add header traceId
+            response.addHeader("traceId", traceId);
             filterChain.doFilter(request, response);
             return;
         }
@@ -73,6 +78,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
 
         // 4) Devam et → rol kontrolü Spring Security tarafından yapılacak
+        response.addHeader("traceId", traceId);
         filterChain.doFilter(request, response);
     }
 }

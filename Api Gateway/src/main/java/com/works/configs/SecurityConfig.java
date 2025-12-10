@@ -2,6 +2,7 @@ package com.works.configs;
 
 import com.works.services.CustomerService;
 import com.works.services.JWTService;
+import io.micrometer.tracing.Tracer;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,8 @@ public class SecurityConfig {
     private final CustomerService customerService;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
+    private final Tracer tracer;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,7 +61,7 @@ public class SecurityConfig {
 
                 // JWT Filter ekle
                 .addFilterBefore(
-                        new SecurityFilter(jwtService, customerService),
+                        new SecurityFilter(jwtService, customerService, tracer),
                         UsernamePasswordAuthenticationFilter.class
                 )
 

@@ -1,4 +1,4 @@
-package com.works.note.models;
+package com.works.product;
 
 import java.io.Serializable;
 
